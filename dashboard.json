@@ -1,0 +1,20 @@
+{
+    "dashboard": {
+        "description": "HTTP 400 Response Ratio Monitor",
+        "title": "HTTP 400 Ratio Dashboard",
+        "panels": [
+            {
+                "type": "table",
+                "search": {
+                    "query": "\nindex=your_index sourcetype=your_sourcetype status=*\n| eval status_category = if(status >= 400 AND status < 500, \"4xx\", \"Other\")\n| stats count by status_category\n| eval ratio = if('4xx' > 0, ('4xx' / ('4xx' + Other)) * 100, 0)\n| where ratio >= (10 / 20) * 100\n| eval timestamp = strftime(_time, \"%Y-%m-%d %H:%M:%S\")\n| table timestamp, ratio\n",
+                    "earliest_time": "-24h@h",
+                    "latest_time": "now"
+                },
+                "title": "HTTP 400 Ratio Table",
+                "options": {
+                    "drilldown": "none"
+                }
+            }
+        ]
+    }
+}
