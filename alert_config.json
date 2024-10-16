@@ -1,0 +1,29 @@
+{
+    "alert": {
+        "title": "HTTP 400 Ratio Alert",
+        "query": "\nindex=your_index sourcetype=your_sourcetype status=*\n| eval status_category = if(status >= 400 AND status < 500, \"4xx\", \"Other\")\n| stats count by status_category\n| eval ratio = if('4xx' > 0, ('4xx' / ('4xx' + Other)) * 100, 0)\n| where ratio >= (10 / 20) * 100\n| eval timestamp = strftime(_time, \"%Y-%m-%d %H:%M:%S\")\n| table timestamp, ratio\n",
+        "time_range": {
+            "earliest": "-24h@h",
+            "latest": "now"
+        },
+        "trigger_condition": "ratio >= 50",
+        "trigger_type": "per_result",
+        "actions": [
+            {
+                "type": "email",
+                "recipients": [
+                    "your_email@example.com"
+                ],
+                "subject": "HTTP 400 Ratio Alert",
+                "body": "Alert: HTTP 400 responses have reached a ratio of {{ratio}}% in the past 24 hours."
+            },
+            {
+                "type": "webhook",
+                "url": "https://your_teams_webhook_url",
+                "payload": {
+                    "text": "HTTP 400 Ratio Alert: {{ratio}}% over the past 24 hours."
+                }
+            }
+        ]
+    }
+}
